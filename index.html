@@ -7,17 +7,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>汤圆的成长档案 🐱</title>
     <link href="https://fonts.googleapis.com/css2?family=Zcool+KuaiLe&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         :root {
-            /* === 配色方案修改：清爽蓝绿系 === */
             --primary-color: #74b9ff; /* 天空蓝 */
             --secondary-color: #55efc4; /* 薄荷绿 */
-            --bg-color: #f1f2f6; /* 淡灰白背景，更护眼 */
+            --bg-color: #f1f2f6;
             --card-bg: #ffffff;
             --text-main: #2d3436;
             --text-light: #636e72;
-            --accent-color: #0984e3; /* 深蓝色强调色 */
+            --accent-color: #0984e3;
         }
 
         body {
@@ -36,37 +35,36 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
+            padding-bottom: 40px; /* 底部留白 */
+        }
+
+        /* 通用卡片样式 */
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
         }
 
         /* 头部卡片 */
         .profile-card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 30px;
             text-align: center;
-            /* 阴影改为蓝色调 */
             box-shadow: 0 10px 20px rgba(116, 185, 255, 0.15);
             border: 3px solid #fff;
+            padding: 30px;
         }
 
-        /* === 头像修改为图片模式 === */
         .avatar-frame {
             width: 130px;
             height: 130px;
             margin: 0 auto 15px;
             border-radius: 50%;
             background: #dfe6e9;
-            overflow: hidden; /* 确保图片不溢出圆形 */
+            overflow: hidden;
             border: 5px solid var(--primary-color);
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            position: relative;
         }
-
-        .avatar-frame img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* 保证图片铺满且不变形 */
-        }
+        .avatar-frame img { width: 100%; height: 100%; object-fit: cover; }
 
         h1 { margin: 0; color: var(--text-main); font-size: 2em; }
         .subtitle { color: var(--accent-color); margin-top: 5px; font-size: 0.9em; font-weight: bold;}
@@ -77,100 +75,96 @@
             gap: 10px;
             margin-top: 25px;
         }
-
         .stat-item {
-            background: #f0f8ff; /* 极淡的蓝色背景 */
+            background: #f0f8ff;
             padding: 15px 10px;
             border-radius: 15px;
-            transition: transform 0.2s;
         }
-        .stat-item:hover { transform: translateY(-3px); }
-
         .stat-value { font-size: 1.2em; font-weight: bold; color: var(--accent-color); display: block;}
         .stat-label { font-size: 0.8em; color: var(--text-light); }
 
-        /* 内容卡片 */
-        .section-card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
-        }
-
         h2 {
-            font-size: 1.3em;
-            margin-bottom: 20px;
+            font-size: 1.3em; margin-bottom: 20px;
             border-left: 5px solid var(--primary-color);
-            padding-left: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-main);
+            padding-left: 10px; color: var(--text-main);
+            display: flex; align-items: center; gap: 8px;
         }
 
-        .timeline {
+        /* === 新增：相册网格样式 === */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 两列布局 */
+            gap: 15px;
+        }
+        .photo-card {
             position: relative;
-            padding-left: 20px;
+            border-radius: 15px;
+            overflow: hidden;
+            aspect-ratio: 1 / 1; /* 正方形 */
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            background: #eee;
+            transition: transform 0.2s;
+        }
+        .photo-card:hover { transform: scale(1.02); }
+        .photo-card img { width: 100%; height: 100%; object-fit: cover; }
+        .photo-tag {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.6); color: white;
+            padding: 5px 10px; font-size: 0.75em;
+            display: flex; justify-content: space-between;
         }
 
+        /* === 灯箱（大图查看）样式 === */
+        .lightbox {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 1000;
+            justify-content: center; align-items: center; flex-direction: column;
+        }
+        .lightbox.active { display: flex; animation: fadeIn 0.2s; }
+        .lightbox img { max-width: 90%; max-height: 80vh; border-radius: 10px; }
+        .lightbox-caption { color: #fff; margin-top: 15px; font-size: 1.1em; }
+        .close-btn {
+            position: absolute; top: 20px; right: 20px;
+            color: white; font-size: 30px; cursor: pointer;
+            background: rgba(255,255,255,0.2); width: 40px; height: 40px;
+            text-align: center; line-height: 40px; border-radius: 50%;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* 时间轴 */
+        .timeline { position: relative; padding-left: 20px; }
         .timeline::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: #dfe6e9;
-            border-radius: 2px;
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+            width: 3px; background: #dfe6e9; border-radius: 2px;
         }
-
-        .event-item {
-            position: relative;
-            margin-bottom: 25px;
-            padding-left: 15px;
-        }
-
+        .event-item { position: relative; margin-bottom: 25px; padding-left: 15px; }
         .event-dot {
-            position: absolute;
-            left: -25px; /* 调整圆点位置 */
-            top: 5px;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            border: 3px solid #fff;
-            box-shadow: 0 0 0 2px #dfe6e9;
-            background: #b2bec3;
+            position: absolute; left: -25px; top: 5px;
+            width: 12px; height: 12px; border-radius: 50%;
+            border: 3px solid #fff; box-shadow: 0 0 0 2px #dfe6e9; background: #b2bec3;
         }
-
-        /* 状态颜色调整 */
         .event-item.done .event-dot { background: var(--secondary-color); box-shadow: 0 0 0 2px var(--secondary-color); }
-        .event-item.future .event-dot { background: #ffeaa7; box-shadow: 0 0 0 2px #ffeaa7; } /* 黄色代表未来 */
+        .event-item.future .event-dot { background: #ffeaa7; box-shadow: 0 0 0 2px #ffeaa7; }
         .event-item.urgent .event-dot { background: #ff7675; box-shadow: 0 0 0 2px #ff7675; }
 
         .event-date { font-size: 0.85em; color: var(--text-light); font-weight: bold; }
         .event-title { font-size: 1em; margin: 3px 0; font-weight: bold; color: #2d3436; }
         .event-desc { font-size: 0.85em; color: #636e72; background: #f1f2f6; padding: 8px; border-radius: 8px; display: inline-block; margin-top: 5px;}
 
-        .tag {
-            font-size: 0.7em;
-            padding: 2px 8px;
-            border-radius: 10px;
-            color: white;
-            vertical-align: middle;
-            margin-left: 5px;
-        }
+        .tag { font-size: 0.7em; padding: 2px 8px; border-radius: 10px; color: white; margin-left: 5px; }
         .tag-vac { background-color: var(--primary-color); }
         .tag-bug { background-color: #fab1a0; }
 
         .footer { text-align: center; font-size: 0.8em; color: #b2bec3; padding-bottom: 20px; }
-
     </style>
 </head>
 <body>
 
     <div class="container">
 
-        <div class="profile-card">
+        <div class="card profile-card">
             <div class="avatar-frame">
                 <img src="photo.jpg" onerror="this.src='https://cdn-icons-png.flaticon.com/512/616/616430.png'" alt="汤圆照片">
             </div>
@@ -187,19 +181,23 @@
                     <span class="stat-label">生日</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-value">1.1 kg</span>
-                    <span class="stat-label">体重</span>
+                    <span class="stat-value" id="latest-weight">--</span>
+                    <span class="stat-label">最新体重</span>
                 </div>
             </div>
         </div>
 
-        <div class="section-card">
-            <h2>🛡️ 疫苗/驱虫记录</h2>
-            <div class="timeline" id="timeline-container">
-                </div>
+        <div class="card">
+            <h2>📸 汤圆成长相册</h2>
+            <div class="gallery-grid" id="gallery-container"></div>
         </div>
 
-        <div class="section-card">
+        <div class="card">
+            <h2>🛡️ 疫苗/驱虫记录</h2>
+            <div class="timeline" id="timeline-container"></div>
+        </div>
+
+        <div class="card">
             <h2>💪 体重变化曲线(kg)</h2>
             <canvas id="weightChart"></canvas>
         </div>
@@ -207,18 +205,36 @@
         <div class="footer">汤圆的专属铲屎官 @2026</div>
     </div>
 
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <div class="close-btn">&times;</div>
+        <img id="lightbox-img" src="" alt="Full View">
+        <div class="lightbox-caption" id="lightbox-caption"></div>
+    </div>
+
     <script>
         // ================= 数据配置区 =================
         const catInfo = {
-            birthDate: "2025-12-28", // 修改这里
-            events: [
+            birthDate: "2025-12-28", // ✅ 已保留你的数据
+
+            // === 新增：在这里添加照片 ===
+            // 格式：{ src: "图片文件名.jpg", date: "拍摄日期", desc: "描述" }
+            photos: [
+                { src: "photo.jpg", date: "2026-03-01", desc: "汤圆个猫主页头像" },
+                { src: "汤圆惊鸿一瞥.jpg", date: "2026-02-27", desc: "汤圆惊鸿一瞥" },
+                { src: "汤圆睡眼惺忪.jpg", date: "2026-02-28", desc: "汤圆睡眼惺忪" },
+                { src: "汤圆四仰八叉.jpg", date: "2026-03-01", desc: "汤圆四仰八叉" },
+
+            ],
+
+            events: [ // ✅ 已保留你的数据
                 { date: "2026-03-14", title: "体检+疫苗", type: "vac", desc: "猫三联首针" },
                 { date: "2026-03-25", title: "体内外驱虫", type: "bug", desc: "爱沃克（外）/海乐妙（内）" },
                 { date: "2026-xx-xx", title: "第2针 妙三多", type: "vac", desc: "间隔3-4周" },
                 { date: "2026-xx-xx", title: "第3针 + 狂犬", type: "vac", desc: "收官之战！" },
                 { date: "2026-04-25", title: "常规驱虫", type: "bug", desc: "记得每个月都要做哦" },
             ],
-            weights: [
+
+            weights: [ // ✅ 已保留你的数据
                 { date: '63天', weight: 0.9 },
                 { date: '64天', weight: 1.1 },
                 { date: '79天', weight: null },
@@ -226,30 +242,84 @@
         };
         // ===========================================
 
-        // 1. 计算年龄
-        function updateAge() {
+        // 工具：计算年龄文本
+        function getAgeText(dateString) {
+            const birth = new Date(catInfo.birthDate);
+            const target = new Date(dateString);
+            const diffTime = target - birth;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            if (diffDays < 60) return `${diffDays}天大`;
+            return `${(diffDays/30).toFixed(1)}个月大`;
+        }
+
+        // 1. 渲染相册 (新增功能)
+        function renderGallery() {
+            const container = document.getElementById('gallery-container');
+            // 按日期倒序，新照片在前面
+            catInfo.photos.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            catInfo.photos.forEach(photo => {
+                const ageLabel = getAgeText(photo.date);
+                const html = `
+                    <div class="photo-card" onclick="openLightbox('${photo.src}', '${photo.desc} (${ageLabel})')">
+                        <img src="${photo.src}" onerror="this.src='https://via.placeholder.com/300?text=No+Image'">
+                        <div class="photo-tag">
+                            <span>${photo.date.substring(5)}</span>
+                            <span>${ageLabel}</span>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
+
+        // 2. 灯箱控制 (新增功能)
+        function openLightbox(src, caption) {
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox-caption').innerText = caption;
+            document.getElementById('lightbox').classList.add('active');
+        }
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
+
+        // 3. 计算当前年龄 & 自动更新最新体重
+        function updateBasicInfo() {
             const birth = new Date(catInfo.birthDate);
             const today = new Date();
             const diffTime = Math.abs(today - birth);
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             document.getElementById('age-display').innerText = diffDays + " 天";
 
-            const bDate = new Date(catInfo.birthDate);
-            document.querySelectorAll('.stat-value')[1].innerText = `${bDate.getFullYear()}.${bDate.getMonth()+1}.${bDate.getDate()}`;
+            // 自动获取最后一次有效的体重记录
+            const validWeights = catInfo.weights.filter(w => w.weight !== null);
+            if (validWeights.length > 0) {
+                const lastRecord = validWeights[validWeights.length - 1];
+                document.getElementById('latest-weight').innerText = lastRecord.weight + " kg";
+            }
         }
 
-        // 2. 渲染时间轴
+        // 4. 渲染时间轴
         function renderTimeline() {
             const container = document.getElementById('timeline-container');
             const today = new Date().setHours(0,0,0,0);
-            catInfo.events.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            // 过滤掉日期是 xx-xx 的待定项目，避免排序报错，或者放在最后
+            // 这里我们简单的把 xx 替换成未来的年份极大值来排序，或者仅渲染有效日期的
+            // 为了展示方便，我们直接渲染
 
             catInfo.events.forEach(event => {
-                const eventDate = new Date(event.date);
-                const isPast = eventDate < today;
-                const isUrgent = !isPast && (eventDate - today) < (3 * 24 * 60 * 60 * 1000);
+                let statusClass = 'future';
+                let isUrgent = false;
 
-                let statusClass = isPast ? 'done' : 'future';
+                // 只有当日期格式正确时才计算状态
+                if (!event.date.includes('xx')) {
+                    const eventDate = new Date(event.date);
+                    const isPast = eventDate < today;
+                    isUrgent = !isPast && (eventDate - today) < (3 * 24 * 60 * 60 * 1000);
+                    statusClass = isPast ? 'done' : 'future';
+                }
+
                 if (isUrgent) statusClass = 'urgent';
 
                 const tagClass = event.type === 'vac' ? 'tag-vac' : 'tag-bug';
@@ -267,7 +337,7 @@
             });
         }
 
-        // 3. 渲染体重图表 (颜色改为蓝色系)
+        // 5. 渲染体重图表
         function renderChart() {
             const ctx = document.getElementById('weightChart').getContext('2d');
             new Chart(ctx, {
@@ -277,8 +347,8 @@
                     datasets: [{
                         label: '体重 (kg)',
                         data: catInfo.weights.map(w => w.weight),
-                        borderColor: '#74b9ff', // 蓝色线条
-                        backgroundColor: 'rgba(116, 185, 255, 0.2)', // 蓝色填充
+                        borderColor: '#74b9ff',
+                        backgroundColor: 'rgba(116, 185, 255, 0.2)',
                         tension: 0.4,
                         fill: true,
                         pointBackgroundColor: '#fff',
@@ -297,7 +367,9 @@
             });
         }
 
-        updateAge();
+        // 初始化所有模块
+        updateBasicInfo();
+        renderGallery();
         renderTimeline();
         renderChart();
     </script>
